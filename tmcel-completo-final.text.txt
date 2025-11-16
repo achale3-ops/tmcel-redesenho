@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-MZ">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TMcel Redesenhado - Tecnologias Web</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #0055A5;
+            color: white;
+            line-height: 1.6;
+        }
+        
+        header {
+            background: #003366;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        button {
+            background: #FF6B00;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background: #e55a00;
+        }
+        
+        .secao {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        input, select {
+            padding: 10px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            width: 200px;
+        }
+        
+        .servico-item {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>?? TMcel Redesenhada</h1>
+        <p>Mais do que uma operadora, somos Moçambique</p>
+    </header>
+    
+    <div class="container">
+        <div class="hero">
+            <h2>?? Bem-vindo à Nova TMcel Digital</h2>
+            <p>Experiência completamente redesenhada - Projeto Tecnologias Web</p>
+            
+            <button onclick="mostrarServicos()">?? Ver Serviços</button>
+            <button onclick="mostrarSobre()">?? Sobre</button>
+        </div>
+        
+        <div class="secao">
+            <h3>?? Sistema de Busca</h3>
+            <input type="text" id="inputBusca" placeholder="Buscar serviços..." onkeyup="buscarServicos()">
+            <select onchange="ordenarServicos()" id="selectOrdenacao">
+                <option value="nome">Ordenar por Nome</option>
+                <option value="preco">Ordenar por Preço</option>
+            </select>
+        </div>
+        
+        <div class="secao">
+            <h3>?? Gestão de Serviços</h3>
+            <input type="text" id="inputNome" placeholder="Nome do serviço">
+            <input type="text" id="inputPreco" placeholder="Preço">
+            <button onclick="adicionarServico()">? Adicionar</button>
+            <button onclick="resetarServicos()" style="background: #00A651;">?? Restaurar Serviços Originais</button>
+            
+            <div id="listaServicos"></div>
+        </div>
+    </div>
+
+    <script>
+        let servicos = [
+            { id: 1, nome: "Internet Móvel", preco: "500 MT", categoria: "dados" },
+            { id: 2, nome: "Voz Pré-pago", preco: "Variado", categoria: "voz" },
+            { id: 3, nome: "mkesh", preco: "Grátis", categoria: "financeiro" },
+            { id: 4, nome: "Banda Larga", preco: "1500 MT", categoria: "dados" }
+        ];
+
+        // BOTÃO DE RESET - NOVA FUNÇÃO
+        function resetarServicos() {
+            servicos = [
+                { id: 1, nome: "Internet Móvel", preco: "500 MT", categoria: "dados" },
+                { id: 2, nome: "Voz Pré-pago", preco: "Variado", categoria: "voz" },
+                { id: 3, nome: "mkesh", preco: "Grátis", categoria: "financeiro" },
+                { id: 4, nome: "Banda Larga", preco: "1500 MT", categoria: "dados" }
+            ];
+            salvarDados();
+            atualizarLista();
+            alert('? Serviços originais restaurados!');
+        }
+
+        function carregarDados() {
+            const salvos = localStorage.getItem('servicosTMcel');
+            if (salvos) {
+                servicos = JSON.parse(salvos);
+            }
+            atualizarLista();
+        }
+
+        function salvarDados() {
+            localStorage.setItem('servicosTMcel', JSON.stringify(servicos));
+        }
+
+        function buscarServicos() {
+            const termo = document.getElementById('inputBusca').value.toLowerCase();
+            if (termo === '') {
+                atualizarLista();
+                return;
+            }
+            const resultados = servicos.filter(servico => 
+                servico.nome.toLowerCase().includes(termo) || 
+                servico.categoria.toLowerCase().includes(termo)
+            );
+            exibirResultados(resultados);
+        }
+
+        function ordenarServicos() {
+            const criterio = document.getElementById('selectOrdenacao').value;
+            servicos.sort((a, b) => {
+                if (criterio === 'nome') return a.nome.localeCompare(b.nome);
+                else return a.preco.localeCompare(b.preco);
+            });
+            atualizarLista();
+        }
+
+        function adicionarServico() {
+            const nome = document.getElementById('inputNome').value;
+            const preco = document.getElementById('inputPreco').value;
+            if (nome && preco) {
+                servicos.push({
+                    id: Date.now(),
+                    nome: nome,
+                    preco: preco,
+                    categoria: "personalizado"
+                });
+                salvarDados();
+                atualizarLista();
+                document.getElementById('inputNome').value = '';
+                document.getElementById('inputPreco').value = '';
+            } else {
+                alert('Preencha nome e preço!');
+            }
+        }
+
+        function removerServico(id) {
+            servicos = servicos.filter(servico => servico.id !== id);
+            salvarDados();
+            atualizarLista();
+        }
+
+        function atualizarLista() {
+            const lista = document.getElementById('listaServicos');
+            lista.innerHTML = '';
+            servicos.forEach(servico => {
+                lista.innerHTML += `
+                    <div class="servico-item">
+                        <div>
+                            <strong>${servico.nome}</strong> - ${servico.preco}
+                            <br><small>Categoria: ${servico.categoria}</small>
+                        </div>
+                        <button onclick="removerServico(${servico.id})">??? Remover</button>
+                    </div>
+                `;
+            });
+        }
+
+        function exibirResultados(resultados) {
+            const lista = document.getElementById('listaServicos');
+            lista.innerHTML = '';
+            resultados.forEach(servico => {
+                lista.innerHTML += `
+                    <div class="servico-item">
+                        <div>
+                            <strong>${servico.nome}</strong> - ${servico.preco}
+                            <br><small>Categoria: ${servico.categoria}</small>
+                        </div>
+                        <button onclick="removerServico(${servico.id})">??? Remover</button>
+                    </div>
+                `;
+            });
+        }
+
+        function mostrarServicos() {
+            alert('Serviços TMcel:\n\n• Internet Móvel - 500MT\n• Voz Pré-pago - Variado\n• mkesh - Grátis\n• Banda Larga - 1500MT');
+        }
+
+        function mostrarSobre() {
+            alert('Projeto Tecnologias Web\n\nSite TMcel Redesenhado\nTecnologias: HTML5, CSS3, JavaScript\nFuncionalidades: CRUD, Busca, Ordenação, localStorage');
+        }
+
+        document.addEventListener('DOMContentLoaded', carregarDados);
+    </script>
+</body>
+</html>
